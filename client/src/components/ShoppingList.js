@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import { Container, ListGroup, ListGroupItem, Button } from "reactstrap";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
-import uuid from "uuid"; // just provides static data for front end development - won't need when we connect to backend
 import { connect } from "react-redux";
-import { getItems } from "../actions/itemsActions";
+import { getItems, deleteItem } from "../actions/itemsActions";
 import PropTypes from "prop-types";
 
 class ShoppingList extends Component {
@@ -22,39 +21,29 @@ class ShoppingList extends Component {
     this.props.getItems();
   }
 
+  onDeleteClick = id => {
+    this.props.deleteItem(id);
+  };
+  // when we click delete button, onDeleteClick will be called with id as argument
+  // onDeleteClick calls the action deleteItem with the id as an argument
+  // looking at the action, it'll send sent to the reducer which will filter the state to not include the item with the given id
+
   render() {
     //below, item represents the entire state object, items is the array inside the state (see itemReducer.js)
     const { items } = this.props.item; // object destructuring
     return (
       <Container>
-        <Button
-          color="dark"
-          style={{ marginBottom: "2rem" }}
-          onClick={() => {
-            const name = prompt("Enter Item");
-            if (name) {
-              this.setState(state => ({
-                items: [...state.items, { id: uuid(), name: name }]
-              }));
-            }
-          }}
-        >
-          Add Item
-        </Button>
         <ListGroup>
           <TransitionGroup className="shopping-list">
-            {items.map(({ id, name }) => (
-              <CSSTransition key={id} timeout={500} classNames="fade">
+            {items.map(({ _id, name }) => (
+              // use _id because that's how mongoDB is set up
+              <CSSTransition key={_id} timeout={500} classNames="fade">
                 <ListGroupItem>
                   <Button
                     className="remove-btn"
                     color="danger"
                     size="sm"
-                    onClick={() => {
-                      this.setState(state => ({
-                        items: state.items.filter(item => item.id !== id)
-                      }));
-                    }}
+                    onClick={this.onDeleteClick.bind(this, _id)}
                   >
                     &times;
                   </Button>
@@ -81,5 +70,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  { getItems }
+  { getItems, deleteItem }
 )(ShoppingList);

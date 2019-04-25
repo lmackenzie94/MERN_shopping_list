@@ -1,4 +1,4 @@
-// npm run server to start
+// npm run dev to start front and back ends
 
 const express = require("express");
 const mongoose = require("mongoose");
